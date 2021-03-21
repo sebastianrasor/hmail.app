@@ -1,0 +1,16 @@
+#!/bin/sh
+
+doveadm quota recalc -A
+
+sqlite3 /var/vmail/_users.sqlite "SELECT user||'@'||domain FROM users WHERE expire=date('now', '+7 day');" | while read email; do
+	echo "Your account expires in 1 week.\nTo renew your account, visit https://hmail.app/pay.html?email=$email" | doas -u vmail mail -s "Expiration Alert" "$email"
+done
+
+sqlite3 /var/vmail/_users.sqlite "SELECT user||'@'||domain FROM users WHERE expire=date('now', '+1 day');" | while read email; do
+	echo "Your account expires in 24 hours.\nTo renew your account, visit https://hmail.app/pay.html?email=$email" | doas -u vmail mail -s "Expiration Alert" "$email"
+done
+
+sqlite3 /var/vmail/_users.sqlite "SELECT user||' '||domain FROM users WHERE expire<=date('now', '-6 month');" | while read user domain; do
+	rm -r "/var/vmail/$domain/$user"
+	[ "$(ls -1 "/var/vmail/$domain" | wc -l)" -eq "0" ] && rmdir "/var/vmail/$domain"
+done
