@@ -80,6 +80,12 @@ elif [ -z "$(echo "$mx" | grep -E "^[[:digit:]]+[[:blank:]]+hmail\.app\.$")" ]; 
 		"host": "_hmail._auth",
 		"value": "$user",
 		"ttl": 3600
+	},
+	{
+		"type": "CNAME",
+		"host": "autoconfig",
+		"value": "autoconfig.hmail.app",
+		"ttl": 3600
 	}
 ]
 EOF
@@ -110,6 +116,12 @@ elif [ -z "$(dig @127.0.0.1 $domain TXT +short | grep -E "^\"?v=spf1[[:blank:]]+
 		"host": "_hmail._auth",
 		"value": "$user",
 		"ttl": 3600
+	},
+	{
+		"type": "CNAME",
+		"host": "autoconfig",
+		"value": "autoconfig.hmail.app",
+		"ttl": 3600
 	}
 ]
 EOF
@@ -139,6 +151,12 @@ elif [ -z "$(dig @127.0.0.1 _hmail._auth.$domain TXT +short | grep -E "^\"?$user
 		"type": "TXT",
 		"host": "_hmail._auth",
 		"value": "$user",
+		"ttl": 3600
+	},
+	{
+		"type": "CNAME",
+		"host": "autoconfig",
+		"value": "autoconfig.hmail.app",
 		"ttl": 3600
 	}
 ]

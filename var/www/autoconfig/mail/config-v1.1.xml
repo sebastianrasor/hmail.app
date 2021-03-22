@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<clientConfig version="1.1">
+	<emailProvider id="hmail.app">
+		<domain>hmail.app</domain>
+		<displayName>Handshake Email</displayName>
+		<displayShortName>Hmail</displayShortName>
+		<incomingServer type="imap">
+			<hostname>hmail.app</hostname>
+			<port>993</port>
+			<socketType>SSL</socketType>
+			<username>%EMAILADDRESS%</username>
+			<authentication>password-cleartext</authentication>
+		</incomingServer>
+
+		<outgoingServer type="smtp">
+			<hostname>hmail.app</hostname>
+			<port>465</port>
+			<socketType>SSL</socketType>
+			<username>%EMAILADDRESS%</username>
+			<authentication>password-cleartext</authentication>
+		</outgoingServer>
+	</emailProvider>
+
+	<webMail>
+		<loginPage url="https://roundcube.hmail.app/"/>
+		<loginPageInfo url="https://roundcube.hmail.app/">
+			<username>%EMAILADDRESS%</username>
+			<usernameField id="email" name="email" />
+			<passwordField name="password" />
+			<loginButton id="submit" name="login"/>
+		</loginPageInfo>
+	</webMail>
+</clientConfig>
