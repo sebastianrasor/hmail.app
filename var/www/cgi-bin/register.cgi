@@ -4,6 +4,8 @@ read query_string
 email="$(printf "$(echo "$query_string" | awk -F '&' '{print $1}' | sed -En "s/email=(.+)/\1/p" | sed -E 's/%(..)/\\x\1\\000/g')")"
 user="$(echo "$email" | awk -F '@' '{print $1}' | LC_CTYPE="en_US.UTF-8" idn2 -T --quiet)"
 domain="$(echo "$email" | awk -F '@' '{print $NF}' | LC_CTYPE="en_US.UTF-8" idn2 -T --quiet 2>&1)"
+subdomain="$(echo "$domain" | sed -nE 's/(.+)\..+/\1/p')"
+topdomain="$(echo "$domain" | awk -F '.' '{print $NF}')"
 password="$(printf "$(echo "$query_string" | awk -F '&' '{print $2}' | sed -En "s/password=(.+)/\1/p" | sed -E 's/%(..)/\\x\1\\000/g')")"
 confirm_password="$(printf "$(echo "$query_string" | awk -F '&' '{print $3}' | sed -En "s/confirm-password=(.+)/\1/p" | sed -E 's/%(..)/\\x\1\\000/g')")"
 mx="$(dig @127.0.0.1 $domain MX +short 2>/dev/null | tr -d '\n')"
@@ -61,31 +63,31 @@ elif [ -z "$(echo "$mx" | grep -E "^[[:digit:]]+[[:blank:]]+hmail\.app\.$")" ]; 
 	echo "<form>"
 	echo "<p>Invalid MX record, please make sure your MX record at $domain. is set to:</p>"
 	echo "<code>0 hmail.app.</code>"
-	echo "<p><a href='https://namebase.io/next/domain-manager/$domain/records?records=$(cat <<EOF | base64
+	echo "<p><a href='https://namebase.io/next/domain-manager/$topdomain/records?records=$(cat <<EOF | base64
 [
 	{
 		"type": "MX",
-		"host": "@",
+		"host": "${subdomain:-@}",
 		"value": "0 hmail.app.",
-		"ttl": 3600
+		"ttl": 60
 	},
 	{
 		"type": "TXT",
-		"host": "@",
+		"host": "${subdomain:-@}",
 		"value": "v=spf1 include:hmail.app",
-		"ttl": 3600
+		"ttl": 60
 	},
 	{
 		"type": "TXT",
-		"host": "_hmail._auth",
+		"host": "_hmail._auth${subdomain:+.}${subdomain}",
 		"value": "$user",
-		"ttl": 3600
+		"ttl": 60
 	},
 	{
 		"type": "CNAME",
-		"host": "autoconfig",
-		"value": "autoconfig.hmail.app",
-		"ttl": 3600
+		"host": "autoconfig${subdomain:+.}${subdomain}",
+		"value": "autoconfig.hmail.app.",
+		"ttl": 60
 	}
 ]
 EOF
@@ -100,28 +102,16 @@ elif [ -z "$(dig @127.0.0.1 $domain TXT +short | grep -E "^\"?v=spf1[[:blank:]]+
 	echo "<p><a href='https://namebase.io/next/domain-manager/$domain/records?records=$(cat <<EOF | base64
 [
 	{
-		"type": "MX",
-		"host": "@",
-		"value": "0 hmail.app.",
-		"ttl": 3600
-	},
-	{
 		"type": "TXT",
-		"host": "@",
+		"host": "${subdomain:-@}",
 		"value": "v=spf1 include:hmail.app",
-		"ttl": 3600
+		"ttl": 60
 	},
 	{
 		"type": "TXT",
-		"host": "_hmail._auth",
+		"host": "_hmail._auth${subdomain:+.}${subdomain}",
 		"value": "$user",
-		"ttl": 3600
-	},
-	{
-		"type": "CNAME",
-		"host": "autoconfig",
-		"value": "autoconfig.hmail.app",
-		"ttl": 3600
+		"ttl": 60
 	}
 ]
 EOF
@@ -136,28 +126,10 @@ elif [ -z "$(dig @127.0.0.1 _hmail._auth.$domain TXT +short | grep -E "^\"?$user
 	echo "<p><a href='https://namebase.io/next/domain-manager/$domain/records?records=$(cat <<EOF | base64
 [
 	{
-		"type": "MX",
-		"host": "@",
-		"value": "0 hmail.app.",
-		"ttl": 3600
-	},
-	{
 		"type": "TXT",
-		"host": "@",
-		"value": "v=spf1 include:hmail.app",
-		"ttl": 3600
-	},
-	{
-		"type": "TXT",
-		"host": "_hmail._auth",
+		"host": "_hmail._auth${subdomain:+.}${subdomain}",
 		"value": "$user",
-		"ttl": 3600
-	},
-	{
-		"type": "CNAME",
-		"host": "autoconfig",
-		"value": "autoconfig.hmail.app",
-		"ttl": 3600
+		"ttl": 60
 	}
 ]
 EOF
@@ -167,6 +139,7 @@ else
 	sqlite3 /vmail/_users.sqlite "INSERT INTO users VALUES('$user','$domain','$(echo $password | encrypt -b 14)',date('now','+7 day'))"
 	hsd_id="email_$(sqlite3 /vmail/_users.sqlite "SELECT ROWID FROM users WHERE user='$user' AND domain='$domain'")"
 	node /hsd/bin/hsw-cli account create "$hsd_id" >/dev/null
+	sed -e "s/%email%/$email/" -e "s/%expire%/$(date -r $(expr $(date +%s) + 604800) +%Y-%m-%d)/" /message | smtp -C -F 'postmaster@hmail.app' -s smtp://localhost:25 $email >/dev/null
 	cat <<EOF
 <title>Account created!</title>
 <div class="centered">

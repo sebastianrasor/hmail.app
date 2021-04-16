@@ -31,7 +31,7 @@ else
 <p>To fund your Hmail account, send any amount of HNS to the following address:
 <p><code>$(node /hsd/bin/hsw-cli rpc getnewaddress $hsd_id)</code>
 <p>Payments are accepted after 1 confirmation.
-<p>Payments resulting in a non-integer number of days will be rounded DOWN. For example; 2.5 HNS will fund an account for 30 days, but 2.49 HNS will fund an account for 29 days.
+<p>Payments resulting in a non-integer number of days will be rounded DOWN. For example; 1 HNS will fund an account for 30 days, but 0.99 HNS will fund an account for 29 days.
 <p>Payment addresses are permanently associated with your account.
 </div>
 EOF
