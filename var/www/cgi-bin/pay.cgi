@@ -24,14 +24,19 @@ else
 	if [ "$(node /hsd/bin/hsw-cli account get $hsd_id)" = "null" ]; then
 		node /hsd/bin/hsw-cli account create "$hsd_id" > /dev/null
 	fi
+	if [ "$(node /bcoin/bin/bwallet-cli account get $hsd_id)" = "null" ]; then
+		node /bcoin/bin/bwallet-cli account create "$hsd_id" > /dev/null
+	fi
 
 	cat <<EOF
 <title>Fund Hmail account</title>
 <div class="centered">
 <p>To fund your Hmail account, send any amount of HNS to the following address:
-<p><code>$(node /hsd/bin/hsw-cli rpc getnewaddress $hsd_id)</code>
+<p><code>$(node /hsd/bin/hsw-cli rpc getaccountaddress $hsd_id)</code>
+<p>You can also pay with Bitcoin by sending any amount of BTC to the following address:
+<p><code>$(node /bcoin/bin/bwallet-cli rpc getaccountaddress $hsd_id)</code>
 <p>Payments are accepted after 1 confirmation.
-<p>Payments resulting in a non-integer number of days will be rounded DOWN. For example; 1 HNS will fund an account for 30 days, but 0.99 HNS will fund an account for 29 days.
+<p>Payments resulting in a non-integer number of days will be rounded DOWN. For example; \$1.00 USD will fund an account for 30 days, but \$0.99 USD will fund an account for 29 days.
 <p>Payment addresses are permanently associated with your account.
 </div>
 EOF

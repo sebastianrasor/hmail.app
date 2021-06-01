@@ -17,11 +17,11 @@ body {
 }
 
 form, div.centered {
-	max-width: 300px;
+	max-width: 375px;
 	margin: auto;
 	padding: 20px 20px;
 	background: #0000001f;
-	border-radius: 8px;
+	border-radius: 4px;
 }
 
 code {
@@ -34,7 +34,7 @@ input[type="email"],
 input[type="password"] {
 	background: rgba(255,255,255,0.1);
 	border: none;
-	border-radius: 8px;
+	border-radius: 4px;
 	font-size: 16px;
 	height: auto;
 	margin: 0;
@@ -55,7 +55,7 @@ button {
 	font-size: 18px;
 	text-align: center;
 	font-style: normal;
-	border-radius: 8px;
+	border-radius: 4px;
 	width: 100%;
 	border: none;
 }
@@ -83,7 +83,7 @@ input:focus:-moz-placeholder{
 @media (prefers-color-scheme: dark) {
 	body {color:#fff;background:#000}
 	code {background:#404040}
-	form {background:#ffffff1f}
+	form,div.centered {background:#ffffff1f}
 	input[type="email"], input[type="password"], textarea, select {background:#0000007f;color:#fff}
 	a:link {color:#9cf}
 	a:hover, a:visited:hover {color:#cef}
